@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>316照片纪念</title>
+    <style>
+        /* ========== 全局基础样式 ========== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            background: #faf9f7;
+            color: #333;
+            line-height: 1.5;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ========== 启动封面页 ========== */
+        .cover-page {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            z-index: 999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.6s ease;
+        }
+        .cover-page::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.2);
+        }
+        .start-btn {
+            position: relative;
+            z-index: 10;
+            padding: 16px 40px;
+            background: rgba(255, 255, 255, 0.95);
+            border: none;
+            border-radius: 50px;
+            font-size: 20px;
+            font-weight: 500;
+            color: #2d2d2d;
+            cursor: pointer;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            transition: all 0.3s ease;
+        }
+        .start-btn:active {
+            transform: scale(0.95);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        /* ========== 顶部导航栏 ========== */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background-color: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(12px);
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            z-index: 100;
+            border-bottom: 1px solid rgba(0,0,0,0.03);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+        }
+
+        .back-btn {
+            width: 36px;
+            height: 36px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            color: #555;
+            cursor: pointer;
+            border-radius: 50%;
+            transition: background 0.2s;
+        }
+
+        .back-btn:active {
+            background-color: rgba(0,0,0,0.05);
+        }
+
+        .nav-title {
+            flex: 1;
+            text-align: center;
+            font-size: 18px;
+            font-weight: 500;
+            color: #2d2d2d;
+            margin-right: 36px;
+        }
+
+        /* ========== 页面容器 ========== */
+        .page {
+            display: none;
+            padding: 80px 20px 40px;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ========== 核心：非对称美学布局 ========== */
+        .category-container {
+            max-width: 850px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            grid-template-rows: auto auto;
+            gap: 16px;
+        }
+
+        /* 毕业照（主视觉，占比最大） */
+        .card-graduation {
+            grid-column: span 8;
+            grid-row: span 2;
+            aspect-ratio: 4 / 3;
+        }
+
+        /* 日常照（次视觉） */
+        .card-daily {
+            grid-column: span 4;
+            grid-row: span 1;
+            aspect-ratio: 3 / 4;
+        }
+
+        /* 活动照 */
+        .card-activity {
+            grid-column: span 4;
+            grid-row: span 1;
+            aspect-ratio: 1 / 1;
+        }
+
+        /* 聚餐照 + jb专栏（小卡片，平衡布局） */
+        .card-dinner, .card-jb {
+            grid-column: span 4;
+            grid-row: span 1;
+            aspect-ratio: 1 / 1;
+        }
+
+        /* 通用卡片样式 */
+        .category-card {
+            border-radius: 24px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: 500;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            user-select: none;
+            position: relative;
+            overflow: hidden;
+            background-size: cover;
+            background-position: center;
+        }
+
+        /* 渐变遮罩（更自然的层次感） */
+        .category-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(0,0,0,0.1), rgba(0,0,0,0.35));
+            border-radius: 24px;
+        }
+
+        .category-card span {
+            position: relative;
+            z-index: 1;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.25);
+            padding: 0 10px;
+        }
+
+        /* 交互动效 */
+        .category-card:active {
+            transform: scale(0.98);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        @media (min-width: 768px) {
+            .category-card:hover {
+                transform: translateY(-6px);
+                box-shadow: 0 12px 30px rgba(0, 0, 0, 0.09);
+            }
+        }
+
+        /* 移动端适配（转为堆叠式美学布局） */
+        @media (max-width: 767px) {
+            .category-container {
+                grid-template-columns: repeat(2, 1fr);
+                grid-template-rows: auto;
+                gap: 12px;
+            }
+            .card-graduation {
+                grid-column: span 2;
+                grid-row: span 1;
+                aspect-ratio: 16 / 9;
+            }
+            .card-daily, .card-activity, .card-dinner, .card-jb {
+                grid-column: span 1;
+                grid-row: span 1;
+                aspect-ratio: 3 / 4;
+            }
+        }
+
+        /* ========== 相册瀑布流布局 ========== */
+        .photo-gallery {
+            column-count: 2;
+            column-gap: 12px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .photo-item {
+            break-inside: avoid;
+            margin-bottom: 12px;
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: pointer;
+            background-color: #eee;
+            transition: transform 0.2s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .photo-item:active {
+            transform: scale(0.98);
+        }
+
+        .photo-item img {
+            width: 100%;
+            height: auto;
+            display: block;
+            object-fit: cover;
+            loading: lazy;
+        }
+
+        /* 加载中提示 */
+        .loading {
+            text-align: center;
+            padding: 40px 0;
+            color: #999;
+            font-size: 16px;
+        }
+
+        /* ========== 全屏预览层 ========== */
+        .preview-mask {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.95);
+            z-index: 200;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .preview-mask.show {
+            display: flex;
+        }
+
+        .preview-img {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+            user-select: none;
+            border-radius: 8px;
+        }
+
+        .preview-close {
+            position: absolute;
+            top: 25px;
+            right: 25px;
+            width: 44px;
+            height: 44px;
+            color: #fff;
+            font-size: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 201;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            transition: background 0.2s;
+        }
+
+        .preview-close:active {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .preview-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 44px;
+            height: 44px;
+            color: #fff;
+            font-size: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            background-color: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            user-select: none;
+            transition: background 0.2s;
+        }
+
+        .preview-nav:active {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .preview-prev { left: 25px; }
+        .preview-next { right: 25px; }
+
+        .preview-counter {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #ddd;
+            font-size: 15px;
+            background: rgba(0,0,0,0.5);
+            padding: 4px 12px;
+            border-radius: 12px;
+        }
+
+        /* ========== 返回顶部按钮 ========== */
+        .back-top {
+            position: fixed;
+            right: 20px;
+            bottom: 30px;
+            width: 48px;
+            height: 48px;
+            background-color: rgba(255,255,255,0.95);
+            border-radius: 50%;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 99;
+            font-size: 20px;
+            color: #666;
+            transition: all 0.2s ease;
+        }
+
+        .back-top.show {
+            display: flex;
+        }
+
+        .back-top:active {
+            transform: scale(0.9);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <!-- 启动封面页 -->
+    <div class="cover-page" id="coverPage" style="background-image: url('./images/covers/封面.jpg');">
+        <button class="start-btn" id="startBtn">点击开启相册</button>
+    </div>
+
+    <!-- 顶部导航栏 -->
+    <div class="navbar">
+        <div class="back-btn" id="backBtn">‹</div>
+        <div class="nav-title" id="navTitle">316照片纪念</div>
+    </div>
+
+    <!-- 首页：非对称美学布局（毕业照→日常照→活动照→聚餐照→jb专栏） -->
+    <div class="page active" id="homePage">
+        <div class="category-container">
+            <!-- 主视觉：毕业照（最大卡片） -->
+            <div class="category-card card-graduation" data-category="毕业照" style="background-image: url('./images/covers/毕业照.jpg');">
+                <span>毕业照</span>
+            </div>
+            <!-- 次视觉：日常照 -->
+            <div class="category-card card-daily" data-category="日常照" style="background-image: url('./images/covers/日常照.jpg');">
+                <span>日常照</span>
+            </div>
+            <!-- 平衡布局：活动照 -->
+            <div class="category-card card-activity" data-category="活动照" style="background-image: url('./images/covers/活动照.jpg');">
+                <span>活动照</span>
+            </div>
+            <!-- 小卡片：聚餐照 -->
+            <div class="category-card card-dinner" data-category="聚餐照" style="background-image: url('./images/covers/聚餐照.jpg');">
+                <span>聚餐照</span>
+            </div>
+            <!-- 小卡片：jb专栏 -->
+            <div class="category-card card-jb" data-category="jb专栏" style="background-image: url('./images/covers/jb专栏.jpg');">
+                <span>jb专栏</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 相册页面 -->
+    <div class="page" id="albumPage">
+        <div class="photo-gallery" id="photoGallery"></div>
+    </div>
+
+    <!-- 全屏图片预览 -->
+    <div class="preview-mask" id="previewMask">
+        <div class="preview-close" id="previewClose">×</div>
+        <div class="preview-nav preview-prev" id="previewPrev">‹</div>
+        <img class="preview-img" id="previewImg" src="" alt="">
+        <div class="preview-nav preview-next" id="previewNext">›</div>
+        <div class="preview-counter" id="previewCounter">1 / 1</div>
+    </div>
+
+    <!-- 返回顶部按钮 -->
+    <div class="back-top" id="backTop">↑</div>
+
+    <script>
+        // ===================== 核心：配置各分类照片（已统一加英文空格） =====================
+        const albumPhotoList = {
+            "jb专栏": [
+                "jb (1).jpg", "jb (2).jpg", "jb (3).jpg", "jb (4).jpg", 
+                "jb (5).jpg", "jb (6).jpg", "jb (7).jpg", "jb (8).jpg", 
+                "jb (9).jpg", "jb (10).jpg", "jb (11).jpg", "jb (12).jpg"
+            ],
+            "毕业照": [
+                "by (1).jpg", "by (2).jpg", "by (3).jpg", "by (4).jpg", 
+                "by (5).jpg", "by (6).jpg", "by (7).jpg", "by (8).jpg", 
+                "by (9).jpg", "by (10).jpg", "by (11).jpg", "by (12).jpg",
+                "by (13).jpg", "hezhao (1).jpg", "hezhao (2).jpg"
+            ],
+            "活动照": [
+                "hd (1).jpg", "hd (2).jpg", "hd (3).jpg", "hd (4).jpg", "hd (5).jpg",
+                "hd (6).jpg", "hd (7).jpg", "hd (8).jpg", "hd (9).jpg", "hd (10).jpg",
+                "hd (11).jpg", "hd (12).jpg", "hd (13).jpg", "hd (14).jpg", "hd (15).jpg",
+                "hd (16).jpg", "hd (17).jpg", "hd (18).jpg", "hd (19).jpg", "hd (20).jpg",
+                "hd (21).jpg", "hd (22).jpg", "hd (23).jpg", "hd (24).jpg", "hd (25).jpg",
+                "hd (26).jpg", "hd (27).jpg", "hd (28).jpg", "hd (29).jpg"
+            ],
+            "聚餐照": [
+                "jucan (1).jpg", "jucan (2).jpg", "jucan (3).jpg", "jucan (4).jpg", 
+                "jucan (5).jpg", "jucan (6).jpg", "jucan (7).jpg", "jucan (8).jpg", 
+                "jucan (9).jpg", "jucan (10).jpg", "jucan (11).jpg", "jucan (12).jpg",
+                "jucan (13).jpg", "jucan (14).jpg"
+            ],
+            "日常照": [
+                "rc (1).jpg", "rc (2).jpg", "rc (3).jpg", "rc (4).jpg", "rc (5).jpg", "rc (6).jpg",
+                "rc (7).jpg", "rc (8).jpg", "rc (9).jpg", "rc (10).jpg", "rc (11).jpg", "rc (12).jpg",
+                "rc (13).jpg", "rc (14).jpg", "rc (15).jpg", "rc (16).jpg", "rc (17).jpg", "rc (18).jpg",
+                "rc (19).jpg", "rc (20).jpg", "rc (21).jpg", "rc (22).jpg", "rc (23).jpg", "rc (24).jpg",
+                "rc (25).jpg", "rc (26).jpg", "rc (27).jpg", "rc (28).jpg", "rc (29).jpg", "rc (30).jpg",
+                "rc (31).jpg", "rc (32).jpg", "rc (33).jpg", "rc (34).jpg", "rc (35).jpg", "rc (36).jpg",
+                "rc (37).jpg", "rc (38).jpg", "rc (39).jpg", "rc (40).jpg", "rc (41).jpg", "rc (42).jpg",
+                "rc (43).jpg", "rc (44).jpg", "rc (45).jpg", "rc (46).jpg", "rc (47).jpg", "rc (48).jpg",
+                "rc (49).jpg", "rc (50).jpg", "rc (51).jpg", "rc (52).jpg"
+            ]
+        };
+
+        // ======================================================
+
+        // DOM元素
+        const coverPage = document.getElementById('coverPage');
+        const startBtn = document.getElementById('startBtn');
+        const homePage = document.getElementById('homePage');
+        const albumPage = document.getElementById('albumPage');
+        const photoGallery = document.getElementById('photoGallery');
+        const navTitle = document.getElementById('navTitle');
+        const backBtn = document.getElementById('backBtn');
+        const backTop = document.getElementById('backTop');
+        const previewMask = document.getElementById('previewMask');
+        const previewImg = document.getElementById('previewImg');
+        const previewCounter = document.getElementById('previewCounter');
+
+        let currentCategory = '';
+        let currentPhotoIndex = 0;
+        let currentPhotoList = [];
+
+        // 点击启动按钮 进入主页
+        startBtn.addEventListener('click', () => {
+            coverPage.style.opacity = '0';
+            setTimeout(() => {
+                coverPage.style.display = 'none';
+            }, 600);
+        });
+
+        // 绑定分类卡片点击事件
+        document.querySelectorAll('.category-card').forEach(card => {
+            card.addEventListener('click', () => {
+                openAlbum(card.dataset.category);
+            });
+        });
+
+        // 打开对应分类相册
+        function openAlbum(category) {
+            currentCategory = category;
+            currentPhotoList = albumPhotoList[category] || [];
+            
+            navTitle.textContent = category;
+            backBtn.style.display = 'flex';
+            renderPhotos();
+            
+            homePage.classList.remove('active');
+            albumPage.classList.add('active');
+            window.scrollTo(0, 0);
+        }
+
+        // 渲染相册照片（兼容本地文件路径）
+        function renderPhotos() {
+            photoGallery.innerHTML = '';
+            
+            if (currentPhotoList.length === 0) {
+                photoGallery.innerHTML = '<div class="loading">暂无照片</div>';
+                return;
+            }
+            
+            currentPhotoList.forEach((filename, index) => {
+                const item = document.createElement('div');
+                item.className = 'photo-item';
+                
+                const img = document.createElement('img');
+                // 拼接绝对路径（解决本地文件访问问题）
+                const basePath = window.location.href.replace('index.html', '');
+                img.src = basePath + `images/${currentCategory}/${filename}`;
+                img.alt = `${currentCategory}-${filename}`;
+                img.loading = 'lazy';
+                
+                // 加载失败提示（显示实际路径）
+                img.onerror = function() {
+                    this.style.display = 'none';
+                    item.innerHTML = `<div style="width:100%;height:150px;display:flex;align-items:center;justify-content:center;color:#999;padding:10px;text-align:center;">图片加载失败<br/>路径：${basePath}images/${currentCategory}/${filename}</div>`;
+                }
+                
+                item.appendChild(img);
+                item.addEventListener('click', () => openPreview(index));
+                photoGallery.appendChild(item);
+            });
+        }
+
+        // 返回首页
+        backBtn.addEventListener('click', () => {
+            albumPage.classList.remove('active');
+            homePage.classList.add('active');
+            navTitle.textContent = '316照片纪念';
+            backBtn.style.display = 'none';
+            window.scrollTo(0, 0);
+        });
+
+        // 打开全屏预览
+        function openPreview(index) {
+            currentPhotoIndex = index;
+            updatePreviewImage();
+            previewMask.classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+
+        // 更新预览图片
+        function updatePreviewImage() {
+            const filename = currentPhotoList[currentPhotoIndex];
+            const basePath = window.location.href.replace('index.html', '');
+            previewImg.src = basePath + `images/${currentCategory}/${filename}`;
+            previewCounter.textContent = `${currentPhotoIndex + 1} / ${currentPhotoList.length}`;
+            
+            previewImg.onerror = function() {
+                this.alt = `无法加载${filename}`;
+                this.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 24 24" fill="none" stroke="%23999" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="11" cy="11" r="2"></circle><path d="M21 15l-5-5L5 21"></path></svg>';
+            }
+        }
+
+        // 上一张/下一张
+        function prevPhoto() {
+            if (currentPhotoIndex > 0) {
+                currentPhotoIndex--;
+                updatePreviewImage();
+            }
+        }
+        function nextPhoto() {
+            if (currentPhotoIndex < currentPhotoList.length - 1) {
+                currentPhotoIndex++;
+                updatePreviewImage();
+            }
+        }
+
+        // 关闭预览
+        function closePreview() {
+            previewMask.classList.remove('show');
+            document.body.style.overflow = '';
+        }
+
+        // 预览按钮绑定
+        document.getElementById('previewPrev').addEventListener('click', (e) => {
+            e.stopPropagation();
+            prevPhoto();
+        });
+        document.getElementById('previewNext').addEventListener('click', (e) => {
+            e.stopPropagation();
+            nextPhoto();
+        });
+        document.getElementById('previewClose').addEventListener('click', (e) => {
+            e.stopPropagation();
+            closePreview();
+        });
+        previewMask.addEventListener('click', (e) => {
+            if (e.target === previewMask) closePreview();
+        });
+
+        // 移动端滑动切换图片
+        let touchStartX = 0;
+        previewMask.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+        }, { passive: true });
+        previewMask.addEventListener('touchend', (e) => {
+            const touchEndX = e.changedTouches[0].screenX;
+            const diff = touchEndX - touchStartX;
+            if (Math.abs(diff) > 50) {
+                diff > 0 ? prevPhoto() : nextPhoto();
+            }
+        }, { passive: true });
+
+        // 返回顶部按钮逻辑
+        window.addEventListener('scroll', () => {
+            backTop.classList.toggle('show', window.scrollY > 300);
+        });
+        backTop.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+
+        // 键盘快捷键（桌面端）
+        document.addEventListener('keydown', (e) => {
+            if (!previewMask.classList.contains('show')) return;
+            if (e.key === 'ArrowLeft') prevPhoto();
+            if (e.key === 'ArrowRight') nextPhoto();
+            if (e.key === 'Escape') closePreview();
+        });
+    </script>
+</body>
+</html>
